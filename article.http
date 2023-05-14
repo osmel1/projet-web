@@ -1,0 +1,16 @@
+GET http://localhost:3000/articles
+###
+GET http://localhost:3000/articles/4
+###
+GET http://localhost:3000/articles?take=10&&skip=20
+###
+POST http://localhost:3000/articles
+Content-Type: application/json
+
+{
+    "title": "New article",
+    "content": "This is the content of the new article.",
+    "author": 5,
+    "image_url": "https://example.com/image.jpg"
+}
+
