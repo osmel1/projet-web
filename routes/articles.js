@@ -1,5 +1,5 @@
-const express= require('express');
-const router= express.Router();
+const express = require('express');
+const router = express.Router();
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 // Import required modules
@@ -9,38 +9,39 @@ router.use(express.json());
 // Define route for adding a new article
 router.post('/', async (req, res) => {
   try {
-     if (!req.body) {
-      return res.status(400).send('body is required');
+    if (!req.body) {
+      return res.status(400).send('Body is required');
     }
 
-    // Create new article object from request body
     const newArticle = {
       title: req.body.title,
       content: req.body.content,
-      authorId: req.body.author,
       image: req.body.image_url,
-
+      author: {
+        connect: { id: req.body.authorId }
+      }
     };
 
-    // Save new article to database using Prisma client
     const createdArticle = await prisma.article.create({
       data: newArticle,
     });
 
-    // Send success response with created article data
     res.status(201).json(createdArticle);
   } catch (err) {
     console.error(err);
-    // Send error response
     res.status(500).send('Error adding article');
   }
 });
+
 // GET /articles route
 router.get('/', async (req, res) => {
   const { take, skip } = req.query;
   const articles = await prisma.article.findMany({
     take: parseInt(take, 10) || undefined,
     skip: parseInt(skip, 10) || undefined,
+    include: {
+      categories: true,
+    },
   });
   res.json(articles);
 });
@@ -51,11 +52,61 @@ router.get('/:id', async (req, res) => {
     {
       where: { id },
     })
-    if(article){
-      res.json(article);
-    }else{
-      res.status(404).json({message: 'Article not found'});
-    }}
-  )
+  if (article) {
+    res.json(article);
+  } else {
+    res.status(404).json({ message: 'Article not found' });
+  }
+}
+)
+
+//  update an existing article
+router.put('/:id', async (req, res) => {
+  const article = req.body
+  await prisma.article
+    .update({
+      where: {
+        id: Number(article.id),
+      },
+      data: {
+        title: article.title,
+        content: article.content,
+        imageUrl: article.imageUrl,
+        published: article.published,
+        authorName: article.authorName,
+        categoryName: article.categoryName,
+        updatedAt: new Date(),
+      },
+    })
+    .then((article) => {
+      res.status(200).json(article)
+    })
+    .catch((err) => {
+      res.status(500).json(err)
+    })
+})
+
+
+
+// suprimmer un article qui a l'id : 
+router.delete('/:id', async (req, res) => {
+  // delete the article with the specified id
+  var { id } = req.params;
+  id = parseInt(id);
+  const article = await prisma.article.findUnique({
+    where: {
+      id: id
+    }
+  });
+  if (!article) {
+    return res.status(404).json('Error hundling The request');
+  }
+  await prisma.article.delete({
+    where: {
+      id: article.id
+    }
+  });
+  return res.json({ message: "article deleted successfuly" });
+});
 
 module.exports = router;    

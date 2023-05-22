@@ -1,59 +1,62 @@
-const { PrismaClient } = require('@prisma/client')
-const { faker } = require('@faker-js/faker')
-const { format } = require('date-fns')
-
-const prisma = new PrismaClient()
+const { PrismaClient } = require('@prisma/client');
+const {faker}  = require('@faker-js/faker/locale/en');
+const { format } = require('date-fns');
+const bcrypt= require('bcrypt')
+const prisma = new PrismaClient();
 
 async function main() {
   // Delete all existing data
 
-  // await prisma.article.deleteMany()
-  await prisma.comment.deleteMany()
-  await prisma.category.deleteMany()
+  await prisma.comment.deleteMany();
+  await prisma.article.deleteMany();
+  await prisma.category.deleteMany();
+  await prisma.user.deleteMany();
+
   // Create categories
-  const categories = []
+  const categories = [];
   for (let i = 0; i < 10; ++i) {
     categories.push({
       id: i,
       name: faker.commerce.department(),
-    })
+    });
   }
   await prisma.category.createMany({
     data: categories,
-  })
+  });
 
   // Create users
-  const users = []
+  const users = [];
   for (let i = 0; i < 10; i++) {
     users.push({
-      id:i,
+      id: i,
       name: faker.person.firstName(),
       email: faker.internet.email(),
-      password: faker.string.alphanumeric({ length: { min: 5, max: 10 } }),
+      password: await bcrypt.hash(faker.string.alpha(10), 10),
       role: 'AUTHOR',
-    })
+    });
   }
   users.push({
-        id:10,
+    id: 10,
     name: faker.person.firstName(),
     email: faker.internet.email(),
-    password: faker.string.alphanumeric({ length: { min: 5, max: 10 } }),
+    password: await bcrypt.hash('password', 10),
     role: 'ADMIN',
-  })
-prisma.user.createMany({
-  data:users
-})
+  });
+  await prisma.user.createMany({
+    data: users,
+  });
+
   // Create articles and comments
-  const articles = []
+  const articles = [];
   for (let i = 0; i < 100; i++) {
-    const categoriesIds = []
-    const randomCategoriesCount = Math.floor(Math.random() * 3) + 1
+    const categoriesIds = [];
+    const randomCategoriesCount = Math.floor(Math.random() * 3) + 1;
     for (let j = 0; j < randomCategoriesCount; j++) {
-      const randomCategoryId = Math.floor(Math.random() * 9)+1
-      categoriesIds.push({ id: randomCategoryId})
+      const randomCategoryId = Math.floor(Math.random() * 9) + 1;
+      categoriesIds.push({ id: randomCategoryId });
     }
 
-    const randomUserId = Math.floor(Math.random() * 9)+1
+    const randomUserId = Math.floor(Math.random() * 9) + 1;
     const article = await prisma.article.create({
       data: {
         title: faker.lorem.sentence(),
@@ -67,12 +70,12 @@ prisma.user.createMany({
           connect: categoriesIds,
         },
       },
-    })
-    articles.push(article)
+    });
+    articles.push(article);
 
-    const randomCommentsCount = Math.floor(Math.random() * 21)
+    const randomCommentsCount = Math.floor(Math.random() * 21);
     for (let k = 0; k < randomCommentsCount; k++) {
-      const randomArticleId = Math.floor(Math.random() * articles.length)
+      const randomArticleId = Math.floor(Math.random() * articles.length);
       await prisma.comment.create({
         data: {
           email: faker.internet.email(),
@@ -81,17 +84,17 @@ prisma.user.createMany({
             connect: { id: articles[randomArticleId].id },
           },
         },
-      })
+      });
     }
   }
 
-  console.log('Seed data added successfully.')
+  console.log('Seed data added successfully.');
 }
 
 main()
   .catch((e) => {
-    console.error(e)
+    console.error(e);
   })
   .finally(async () => {
-    await prisma.$disconnect()
-  })
+    await prisma.$disconnect();
+  });

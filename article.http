@@ -13,4 +13,15 @@ Content-Type: application/json
     "author": 5,
     "image_url": "https://example.com/image.jpg"
 }
+###
+PUT  http://localhost:3000/articles/8/
+Content-Type: application/json
 
+{
+    "title": "New article",
+    "content": "This is the content of the new article.",
+    "author": 5,
+    "image_url": "https://example.com/image.jpg"
+}
+### 
+DELETE  http://localhost:3000/articles/8

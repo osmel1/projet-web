@@ -1,0 +1,86 @@
+/* Customize the scrollbar track */
+::-webkit-scrollbar-track {
+    background-color: #f1f1f1;
+  }
+
+  /* Customize the scrollbar thumb */
+::-webkit-scrollbar-thumb {
+    background-color: #961010;
+    border-radius: 5px;
+  }
+
+  /* Customize the scrollbar on hover */
+::-webkit-scrollbar-thumb:hover {
+    background-color: #555;
+  }
+
+.category-element{
+    border-left: 1px rgb(30, 88, 177) solid;
+    border-right: 1px rgb(30, 88, 177) solid;
+    margin-bottom: 5%;
+}
+.tagsElements {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.card {
+    background-color: rgb(225, 207, 194);
+    flex-grow: 1;
+}
+.card-body h2{
+    font-size: 1.3rem;
+}
+h1{
+    margin-top: 10px;
+    color: #961010;
+    font-size: 24px;
+     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.tags-title {
+    font-size: 0.62rem;
+    color: rgb(8, 40, 40);
+    padding: 5px;
+    height: 0.8rem;
+}
+
+.tags  {
+    background-color: rgb(221, 215, 215);
+    color: black;
+    border-radius: 4px;
+    padding: 2px;
+    margin: 2%;
+    font-size: 0.6rem;
+}
+
+.tags-name {
+    display: flex;
+}
+
+.comment{
+    display: flex;
+    width: 75vw;
+    position: absolute;
+    margin-left: 10vw; 
+    margin-right: 10VW; 
+    top: 10%;
+    z-index: 999;
+    background-color: rgb(136, 73, 73);   
+}
+.comment .card{
+        background-color: rgb(136, 73, 73);   
+        border-color:transparent ;
+        display: flex; 
+        flex-direction: row;
+        width: 70%;
+}
+.btn-display{
+    position: absolute;
+    right: 0;    
+    
+}
+.buttons{
+    display: flex;
+    justify-content: space-between;
+}
