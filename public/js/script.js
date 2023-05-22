@@ -12,6 +12,20 @@ function getUserId() {
     });
   });
 }
+function getUserName() {
+  return new Promise(function (resolve, reject) {
+    $.ajax({
+      url: '/user/id',
+      type: 'GET',
+      success: function (response) {
+        resolve(response.userName);
+      },
+      error: function (xhr, status, error) {
+        reject(error);
+      }
+    });
+  });
+}
 function getUserEmailFromSession() {
   return new Promise(function (resolve, reject) {
     var xhr = new XMLHttpRequest();
@@ -109,6 +123,58 @@ function postComment(numberId, commentContent) {
 
     }))
 }
+function getUserById(id) {
+  return new Promise((resolve, reject) =>
+    $.ajax({
+      url: `/users/${id}`,
+      method: 'GET',
+      success: function (data) {
+        resolve(data);
+      },
+      error: function (data) {
+        reject(data);
+      }
+    })
+  )
+}
+
+function displayUserName() {
+
+}
+
+function updateUserArticles(id) {
+  getUserById(id)
+    .then((user) => {
+      const articles = user.articles;
+      let myArticles = document.getElementById('myArticles');
+      myArticles.innerHTML = ` `
+      articles.forEach((article) => {
+        let div = document.createElement('div');
+        div.className = 'row g-3 m-2 border border-primary';
+        div.id = article.id;
+        div.innerHTML = `
+          <div class="col-md-6">
+          <img src=${article.image} />
+          </div>
+          <div class="col-md-6">
+          <h5>${article.title}</h5>
+          <p>${article.content}</p>
+          <p>${article.content}</p>
+          </div>
+          `
+        const deleteButton = document.createElement('button');
+        deleteButton.className = 'btn btn-danger d-flex justify-content-center w-25 '
+        deleteButton.textContent = 'Delete'
+        deleteButton.addEventListener('click', () => {
+          deleteArticle(article.id);
+        })
+        div.appendChild(deleteButton);
+        myArticles.appendChild(div);
+      })
+    })
+    .catch((err) => console.log("you have some problems", err))
+}
+
 // Function to get articles
 function getArticles(take = 10, skip = 0) {
   return new Promise((resolve, reject) => {
@@ -152,6 +218,7 @@ function getCategoryById(id) {
     });
   });
 }
+
 
 function getCategories(take = 10, skip = 0) {
   return new Promise((resolve, reject) => {
@@ -314,6 +381,7 @@ $('.categoriesdiv').hide();
 $('.articlediv').hide();
 $(".onlyformem").hide();
 $('.loginpage').hide();
+$('#myArticles').hide();
 
 
 
@@ -330,19 +398,30 @@ $(document).ready(function () {
     $('.homediv').hide();
     $('.articlediv').show();
     $('.loginpage').hide();
+    $('#myArticles').hide();
   })
   $("#category-nav").on('click', () => {
     $('.articlediv').hide();
     $('.homediv').hide();
     $('.categoriesdiv').show();
     $('.loginpage').hide();
+    $('#myArticles').hide();
   })
   $('#home-nav').on('click', () => {
     $('.articlediv').hide();
     $('.homediv').show();
     $('.categoriesdiv').hide();
     $('.loginpage').hide();
+    $('#myArticles').hide();
   })
+  $('#myarticlesDiv').on('click', () => {
+    console.log("first")
+    $('.articlediv').hide();
+    $('.homediv').hide();
+    $('.categoriesdiv').hide();
+    $('.loginpage').hide();
+    $('#myArticles').show();
+  });
   let articleId;
   $(document).on('click', '#t', function (event) {
     event.preventDefault();
@@ -390,7 +469,18 @@ $(document).ready(function () {
     postLogin(username, password)
       .then(function (response) {
         if (response.success) {
+          getUserName()
+            .then((username) => {
+              console.log('keep')
+              let welcomScection = $('.welcomingName');
+              welcomScection.text(`Welcome ${username}`);
+              // welcomScection.innerHTML = `<h2>hello ${username}</h2>`;
+            })
+            .catch(err => console.log(err))
           updateArticles(take);
+          getUserId().then((res) => {
+            updateUserArticles(res);
+          })
           $('.loginpage').hide();
           $('#submit').hide();
           $('.onlyformem').show();

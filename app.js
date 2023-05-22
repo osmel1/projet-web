@@ -55,7 +55,7 @@ app.get('/', (req, res) => {
 })
 app.use('/articles', articles)
 app.use('/categories', categorie);
-app.use('/users', checkAuthenticated, user);
+app.use('/users',user);
 app.use('/comments', bodyParser.json(), comment);
 app.use('/login', login)
 app.delete('/logout', (req, res) => {
@@ -77,7 +77,8 @@ app.get('/user/email', (req, res) => {
 });
 app.get('/user/id', (req, res) => {
   var userId = req.session.idUser || '';
-  res.json({ userId: userId });
+  var userName = req.session.userName;
+  res.json({ userId: userId,userName:userName });
 })
 function checkAuthenticated(req, res, next) {
   if (req.isAuthenticated()) {

@@ -4,6 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="shortcut icon" href="logo.png" type="image/x-icon">
   <title>Blog Page</title>
   <!-- Add CDN links for jQuery, Bootstrap, and Bootstrap Icons -->
   <script src="https://code.jquery.com/jquery-3.7.0.min.js"
@@ -39,7 +40,7 @@
           </ul>
         </li>
         <li class="nav-item onlyformem">
-          <a class="nav-link" href="#" id="submit">My Articles</a>
+          <a class="nav-link" href="#" id="myarticlesDiv">My Articles</a>
         </li>
           <li class="nav-item">
             <a class="nav-link" href="#" id="submit">Log In</a>
@@ -56,7 +57,9 @@
   <!-- navbar end -->
   <div class="homediv">
     <div class="card">
-      <h1>Welcome to Blog Page</h1>
+      <div class="welcomingName"></div>
+      <h1>Welcome to Blog Project</h1>
+      <img src="img.png" alt="decoration">
       <p>Welcome to the final module project of our blog development journey! In this project, we will focus on creating an impressive and user-friendly home page for our blog using the powerful combination of Express and Prisma. </p>
     </div>
 
@@ -90,7 +93,7 @@
 </form>
  </div>
  
- <div id="myArticles" class="onlyformem"></div>
+ <div id="myArticles" ></div>
   <!-- modal where will  display the article clicked  -->
   <div>
 

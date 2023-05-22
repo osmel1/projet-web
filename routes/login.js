@@ -24,6 +24,7 @@ app.get('/', (req, res) => {
 app.post('/', passport.authenticate('local'), (req, res) => {
   req.session.userEmail = req.user.email;
   req.session.idUser = req.user.id;
+  req.session.userName = req.user.name;
   const user = req.user;
   console.log(req.session);
   res.json({ success: true, user: user });
