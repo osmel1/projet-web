@@ -18,7 +18,7 @@ router.post('/', async (req, res) => {
       content: req.body.content,
       image: req.body.image_url,
       author: {
-        connect: { id: req.body.authorId }
+        connect: { id: req.body.author }
       }
     };
 
@@ -41,6 +41,7 @@ router.get('/', async (req, res) => {
     skip: parseInt(skip, 10) || undefined,
     include: {
       categories: true,
+      comments:true,
     },
   });
   res.json(articles);
@@ -51,6 +52,9 @@ router.get('/:id', async (req, res) => {
   const article = await prisma.article.findUnique(
     {
       where: { id },
+      include: {
+      comments:true,
+    },
     })
   if (article) {
     res.json(article);
@@ -90,23 +94,23 @@ router.put('/:id', async (req, res) => {
 
 // suprimmer un article qui a l'id : 
 router.delete('/:id', async (req, res) => {
-  // delete the article with the specified id
-  var { id } = req.params;
-  id = parseInt(id);
-  const article = await prisma.article.findUnique({
+  const { id } = req.params;
+  const articleId = parseInt(id);
+
+  // Delete comments associated with the article
+  await prisma.comment.deleteMany({
     where: {
-      id: id
+      articleId: articleId
     }
   });
-  if (!article) {
-    return res.status(404).json('Error hundling The request');
-  }
+
+  // Delete the article
   await prisma.article.delete({
     where: {
-      id: article.id
+      id: articleId
     }
   });
-  return res.json({ message: "article deleted successfuly" });
-});
 
+  return res.json({ message: "Article and associated comments deleted successfully" });
+});
 module.exports = router;    

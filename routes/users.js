@@ -56,7 +56,7 @@ router.delete('/:id',async (req,res)=>{
         })
     .catch(err=>res.status(404).json({message : err}))
 })
-router.post('/users', async (req, res) => {
+router.post('/', async (req, res) => {
   try {
     if (!req.body.name || !req.body.email || !req.body.password || !req.body.role) {
       return res.status(400).send('Name, email, password, and role are required');

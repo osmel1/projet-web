@@ -24,6 +24,9 @@ router.get('/:id', async (req, res) => {
     where: {
       id: id,
     },
+    include: {
+      articles: true,
+    },
   });
   if (!categorie) {
     return res.status(404).json({ error: 'categorie not found' });

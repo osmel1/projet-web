@@ -1,31 +1,48 @@
-/* Customize the scrollbar track */
-::-webkit-scrollbar-track {
-    background-color: #f1f1f1;
-  }
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
 
-  /* Customize the scrollbar thumb */
-::-webkit-scrollbar-thumb {
-    background-color: #961010;
-    border-radius: 5px;
-  }
+:root{
+    --first:#153644;
+    --second : #16a387;
+    --third:#90b4c5;
+}
 
-  /* Customize the scrollbar on hover */
-::-webkit-scrollbar-thumb:hover {
-    background-color: #555;
+@media screen and (min-width: 992px) {
+  .navbar-toggler{
+    display: none;
   }
+}
 
+/* On screens that are 600px or less, set the background color to olive */
+@media screen and (max-width: 600px) {
+   .navbar-toggler{
+    display: block;
+  }
+}
+body{
+    font-family: 'Poppins', sans-serif;
+}
+.commentaire-section{
+    max-height: 15vh;
+    overflow-y: scroll;
+    background-color: #afe1f8;
+}
+.commentaire-section::-webkit-scrollbar {
+  display: none;
+}
 .category-element{
-    border-left: 1px rgb(30, 88, 177) solid;
-    border-right: 1px rgb(30, 88, 177) solid;
+    border-left: 1px var(--first) solid;
+    border-right: 1px var(--first) solid;
     margin-bottom: 5%;
 }
 .tagsElements {
     display: flex;
     flex-wrap: wrap;
 }
-
+.homediv h1{
+    font-size: 2.5rem;
+}
 .card {
-    background-color: rgb(225, 207, 194);
+    background-color:var(--third);
     flex-grow: 1;
 }
 .card-body h2{
@@ -33,21 +50,32 @@
 }
 h1{
     margin-top: 10px;
-    color: #961010;
+    color: var(--first);
     font-size: 24px;
      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
+#t{
+    color: var(--first);
+    transition: .4s ease;
+}
+#t:hover{
+    color: var(--second);
+    font-weight: bold;
+    letter-spacing: 0.5rem;
+        transition: .4s ease;
 
+}
 .tags-title {
-    font-size: 0.62rem;
-    color: rgb(8, 40, 40);
+    font-size: 0.8rem;
+    color:aliceblue;
     padding: 5px;
-    height: 0.8rem;
+    height: 1.1rem;
+    font-weight: 700;
 }
 
 .tags  {
-    background-color: rgb(221, 215, 215);
-    color: black;
+    background-color: var(--third);
+    color: var(--first);
     border-radius: 4px;
     padding: 2px;
     margin: 2%;
@@ -57,7 +85,11 @@ h1{
 .tags-name {
     display: flex;
 }
-
+.nav-link:last-of-type{
+    background-color: transparent;
+    border: none;
+    padding-left:  0%;
+}
 .comment{
     display: flex;
     width: 75vw;
@@ -66,19 +98,33 @@ h1{
     margin-right: 10VW; 
     top: 10%;
     z-index: 999;
-    background-color: rgb(136, 73, 73);   
+    background-color: var(--first);   
 }
 .comment .card{
-        background-color: rgb(136, 73, 73);   
+        background-color: var(--second);   
         border-color:transparent ;
         display: flex; 
         flex-direction: row;
         width: 70%;
 }
+
+.background-fancy{
+    background-color: var(--third);
+    border: 5px white solid;
+    border-radius: 10px;
+}
 .btn-display{
     position: absolute;
     right: 0;    
     
+}
+.img-thumbnail{
+    width: 5vw;
+    height: 5vw;
+    background-image: none;
+}
+.imgplustitle{
+    display: flex;
 }
 .buttons{
     display: flex;

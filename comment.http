@@ -1,0 +1,11 @@
+GET http://localhost:3000/comments?skip=0&take=10&&article=514
+
+###
+POST http://localhost:3000/comments 
+Content-Type: application/json
+
+{
+  "contenu" : "I love your content ",
+  "email":"ouss@gmail.com",
+  "articleId" : 515
+}
