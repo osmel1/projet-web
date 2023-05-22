@@ -47,6 +47,9 @@ body{
     max-width: 50vw;
     margin-left: 10%;
 }
+#ID{
+    width: 50vw;
+}
 .homediv p{
     font-size: 1.4rem;  
     font-weight: 700;
