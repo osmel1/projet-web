@@ -2,7 +2,7 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const express = require('express');
 const router = express.Router();
-
+router.use(express.json())
 // Récupérer toutes les catégories
 router.get('/', async (req, res) => {
   var skip = parseInt(req.query.skip) || 0;

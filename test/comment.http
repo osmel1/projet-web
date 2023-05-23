@@ -9,3 +9,5 @@ Content-Type: application/json
   "email":"ouss@gmail.com",
   "articleId" : 515
 }
+###
+GET http://localhost:3000/comments/5105

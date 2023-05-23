@@ -1,0 +1,21 @@
+GET http://localhost:3000/categories
+###
+GET http://localhost:3000/categories/4
+###
+GET http://localhost:3000/categories?take=10&&skip=0
+###
+POST http://localhost:3000/categories
+Content-Type: application/json
+
+{
+    "name": "New Categorie"
+}
+###
+PUT  http://localhost:3000/categories/8/
+Content-Type: application/json
+
+{
+    "name": "anotherName"
+}
+### 
+DELETE  http://localhost:3000/articles/514
