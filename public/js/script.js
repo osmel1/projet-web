@@ -26,6 +26,21 @@ function getUserName() {
     });
   });
 }
+function getRole() {
+  return new Promise(function (resolve, reject) {
+    $.ajax({
+      url: '/user/id',
+      type: 'GET',
+      success: function (response) {
+        resolve(response);
+      },
+      error: function (xhr, status, error) {
+        reject(error);
+      }
+    });
+  });
+}
+
 function getUserEmailFromSession() {
   return new Promise(function (resolve, reject) {
     var xhr = new XMLHttpRequest();
@@ -58,6 +73,71 @@ function deleteArticle(id) {
     })
   })
 }
+function deleteUser(id) {
+  return new Promise((resolve, reject) => {
+    $.ajax({
+      url: `/users/${id}`,
+      method: 'DELETE',
+      success: (data) => {
+        resolve(data)
+      },
+      error: (error) => {
+        reject(error)
+      }
+    })
+  })
+}
+function getUsers() {
+  console.log("you will display the users");
+  getRole().then(
+    (response) => {
+      if (response.myRole === 'ADMIN') {
+        return new Promise((resolve, reject) => {
+          $.ajax({
+            url: '/users',
+            type: 'GET',
+            success: (response) => {
+              $('#users').html('');
+              const divUsersContainer = document.createElement('div');
+
+              response.forEach((res) => {
+                const divUsers = document.createElement('div');
+                divUsers.className = 'usersContainer';
+                divUsers.innerHTML = `
+          <h2>${res.name}</h2>
+          <a href='#'>${res.email}</a>
+          `
+                const buttonDel = document.createElement('button');
+                buttonDel.id = res.id
+                buttonDel.innerHTML = 'Delete';
+                buttonDel.className = "btn btn-danger"
+                buttonDel.addEventListener('click', () => {
+                  alert('Are You Sure You Want to Delete? ')
+                  deleteUser(res.id)
+                    .then(() => {
+                      getUsers();
+                    })
+                    .catch((error) => {
+                      console.error(error);
+                    });
+                })
+                divUsers.append(buttonDel)
+                divUsersContainer.append(divUsers)
+                $('#users').append(divUsersContainer)
+              })
+            },
+            error: (error) => {
+              reject(error)
+            }
+          })
+        })
+      }
+    }
+  )
+
+}
+
+
 function postArticle(idAuthor, contenu, title, imageUrl) {
   return new Promise((resolve, reject) => {
     $.ajax({
@@ -403,7 +483,7 @@ function updateArticles(take) {
       articleBody.appendChild(commentContainer);
 
       getUserId().then((res) => {
-        if (article.authorId === res) {
+        if (article.authorId === res||myRole=='ADMIN') {
           deleteButton.innerHTML = 'Delete';
           deleteButton.addEventListener('click', () => {
             window.alert('Are you sure you want to delete?');
@@ -428,6 +508,12 @@ function updateArticles(take) {
     console.error('Error fetching articles:', error);
   });
 }
+function updateSectionAdmin(myRole) {
+  if (myRole == 'ADMIN') {
+    const divAdmin = document.createElement('div');
+    divAdmin.html("<button> add User</button><button>delete User</button>")
+  }
+}
 function updateUserName() {
   getUserName()
     .then(function (username) {
@@ -444,7 +530,8 @@ function updateUserName() {
 let take = 4;
 let takeCat = 10;
 let tmp = 4;
-let flag=false;
+let flag = false;
+var myRole = '';
 function loadMoreArticles() {
   take += 4;
   updateArticles(take);
@@ -464,12 +551,19 @@ $('.articlediv').hide();
 $(".onlyformem").hide();
 $('.loginpage').hide();
 $('#myArticles').hide();
+$('#users').hide();
+$('.onlyforadmin').hide()
 $.get('/protected', (data) => {
   if (data.authenticated) {
-    flag=true;
+    flag = true;
+    myRole = data.myRole;
     $('.login-page').hide();
     $('#submit').hide();
     $('.onlyformem').show();
+    if (myRole == 'ADMIN') {
+      getUsers();
+      $('.onlyforadmin').show();
+    }
     updateUserName();
     updateUserArticles(Number(data.userId))
   } else {
@@ -478,6 +572,7 @@ $.get('/protected', (data) => {
     console.log('User is not authenticated');
   }
 });
+
 
 
 $(document).ready(function () {
@@ -506,6 +601,15 @@ $(document).ready(function () {
     $('.homediv').hide();
     $('.categoriesdiv').hide();
     $('#myArticles').show();
+    $('.loginpage').hide();
+    $('#users').hide();
+  });
+  $('#dashboard').on('click', () => {
+    $('.articlediv').hide();
+    $('.homediv').hide();
+    $('.categoriesdiv').hide();
+    $('#myArticles').hide();
+    $('#users').show();
     $('.loginpage').hide();
   });
   let articleId;
@@ -558,7 +662,12 @@ $(document).ready(function () {
     postLogin(username, password)
       .then(function (response) {
         if (response.success) {
-          flag=true
+          flag = true
+          myRole = response.Myrole;
+          if (myRole === 'ADMIN') {
+            getUsers();
+            $('.onlyforadmin').show()
+          }
           getUserName()
             .then((username) => {
               $('.welcomingName').html(`Welcome <span class="userName">${username}</span> To The Best Blog`);
@@ -588,7 +697,7 @@ $(document).ready(function () {
         })
   });
   $('#logout-button').click(function (event) {
-    flag=false;
+    flag = false;
     event.preventDefault();
     $.ajax({
       url: '/logout',
@@ -600,17 +709,21 @@ $(document).ready(function () {
         $('.homediv').show();
         $('.welcomingName').hide();
         $('#submit').show();
+        $('.onlyforadmin').hide()
       },
       error: function (error) {
         console.error('Error during logout:', error);
       }
     });
   });
-  $('.btn-close').on('click',(event)=>{
-    if(flag){
+  $('.btn-close').on('click', (event) => {
+    if (flag) {
       console.log("clicked btn")
       $('#myArticles').show();
       $('.onlyformem').show();
+      if (myRole == 'ADMIN') {
+        $('.onlyforadmin').show();
+      }
     }
   })
 

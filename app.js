@@ -66,7 +66,7 @@ app.delete('/logout', (req, res) => {
 })
 app.get('/protected', (req, res) => {
   if (req.session.idUser) {
-    res.send({ authenticated: true,userId: req.session.idUser });
+    res.send({ authenticated: true,userId: req.session.idUser ,myRole:req.session.myRole});
   } else {
     res.send({ authenticated: false });
   }
@@ -78,8 +78,9 @@ app.get('/user/email', (req, res) => {
 app.get('/user/id', (req, res) => {
   var userId = req.session.idUser || '';
   var userName = req.session.userName;
-  res.json({ userId: userId,userName:userName });
+  res.json({ userId: userId,userName:userName,myRole: req.session.myRole});
 })
+
 app.get('/authentication',(req,res)=>{
   const value=false;
   if(req.isAuthenticated()){

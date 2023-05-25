@@ -38,12 +38,12 @@ app.post('/', (req, res, next) => {
     if (!user) {
       return res.json({ success: false, message: info.message });
     }
-
     req.session.userEmail = user.email;
     req.session.idUser = user.id;
     req.session.userName = user.name;
+    req.session.myRole= user.role;
    console.log(user) 
-    return res.json({ success: true, user: user });
+    return res.json({ success: true, user: user,Myrole:user.role, });
   })(req, res, next);
 });
 

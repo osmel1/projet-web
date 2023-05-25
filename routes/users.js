@@ -50,15 +50,52 @@ router.put('/:id', async (req, res) => {
 
 router.delete('/:id', async (req, res) => {
     const { id } = req.params;
-    await prisma.user
-        .delete(
-            {
+    const idUser = parseInt(id);
+
+    try {
+        const user = await prisma.user.findUnique({
+            where: {
+                id: idUser
+            }
+        });
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const articles = await prisma.article.findMany({
+            where: {
+                authorId: idUser
+            }
+        });
+
+        for (const article of articles) {
+            await prisma.comment.deleteMany({
                 where: {
-                    id: parseInt(id),
-                },
-            })
-        .catch(err => res.status(404).json({ message: err }))
-})
+                    articleId: article.id
+                }
+            });
+        }
+
+        await prisma.article.deleteMany({
+            where: {
+                authorId: idUser
+            }
+        });
+
+        await prisma.user.delete({
+            where: {
+                id: idUser
+            }
+        });
+
+        res.json({ message: 'User deleted successfully' });
+    } catch (err) {
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+
 router.post('/', async (req, res) => {
     try {
         if (!req.body.name || !req.body.email || !req.body.password || !req.body.role) {

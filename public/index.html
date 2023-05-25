@@ -45,13 +45,16 @@
           </ul>
         </li>
         <li class="nav-item onlyformem">
-          <a class="nav-link animate__animated animate__fadeInRight " href="#" id="myarticlesDiv">My Articles</a>
+          <a class="nav-link animate__animated animate__fadeInUp" href="#" id="myarticlesDiv">My Articles</a>
         </li>
           <li class="nav-item">
-            <a class="nav-link animate__animated delayzeropointtwoSecond" href="#" id="submit">Log In</a>
+            <a class="nav-link animate__animated  animate__fadeInUp" href="#" id="submit">Log In</a>
+          </li>
+          <li class="nav-item onlyforadmin">
+            <a class="nav-link animate__animated  animate__fadeInUp" href="#" id="dashboard">Dashboard</a>
           </li>
         </ul>
-        <div class="onlyformem animate__animated animate__fadeInRight delayHalfSecond">
+        <div class="onlyformem animate__animated animate__fadeInUp delayHalfSecond">
         <form class="" action="/logout?_method=DELETE" method="POST">
           <button class="nav-link" id="logout-button" type="submit">Log Out</button>
         </form>
@@ -100,7 +103,8 @@
  </div>
  
  <div id="myArticles" ></div>
-  <!-- modal where will  display the article clicked  -->
+ <div id="users"></div> 
+ <!-- modal where will  display the article clicked  -->
   <div>
 
     <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">

@@ -272,3 +272,13 @@ h4 {
     padding: 5%;
     margin-bottom: 10rem;
 }
+.usersContainer{
+    display: flex;
+    justify-content: space-between;
+    border: #b8babb 2px solid;
+    padding: 10px;
+    width: 100%;
+}
+#users{
+    margin-top: 2rem;
+}
