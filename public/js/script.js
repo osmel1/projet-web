@@ -58,6 +58,27 @@ function deleteArticle(id) {
     })
   })
 }
+function postArticle(idAuthor, contenu, title, imageUrl) {
+  return new Promise((resolve, reject) => {
+    $.ajax({
+      url: `/articles`,
+      method: 'POST',
+      data: {
+        "author": parseInt(idAuthor),
+        "content": contenu,
+        "title": title,
+        "image_url": imageUrl
+      },
+      success: (data) => {
+        resolve(data)
+      },
+      error: (error) => {
+        reject(error)
+      }
+    })
+  }
+  )
+}
 function getComment(articleId) {
   return new Promise((resolve, reject) => {
     $.ajax({
@@ -137,28 +158,50 @@ function getUserById(id) {
     })
   )
 }
-
-function displayUserName() {
-
-}
-
 function updateUserArticles(id) {
   getUserById(id)
     .then((user) => {
       const articles = user.articles;
       let myArticles = document.getElementById('myArticles');
       myArticles.innerHTML = ` `
+      let addAnotherArticle = document.createElement('div')
+      addAnotherArticle.innerHTML = `
+           <a role="button" id="anotherArticle" data-bs-toggle="modal" type="button" data-bs-target="#exampleModal" data-bs-whatever="${user.id}" class="btn btn-success">Add Article</a><br>
+     `
+      addAnotherArticle.addEventListener('click', (event) => {
+        event.preventDefault();
+        const modalTitle = exampleModal.querySelector('.modal-body');
+        const id = event.target.dataset.whatever;
+        let formAdd = document.createElement('form')
+        formAdd.id = 'formAdd'
+        formAdd.innerHTML = `
+        <div class="mb-3">
+        <label for="title" class="form-label">Title</label>
+        <input type="text" class="form-control" id="title" aria-describedby="title">
+        </div>
+        <div class="mb-3">
+        <label for="content" class="form-label">Content</label>
+        <input type="text" class="form-control" id="content" aria-describedby="content">
+        </div>
+        <div class="mb-3">
+        <label for="imageUrl" class="form-label">Image Url</label>
+        <input type="text" class="form-control" id="imgurl" aria-describedby="content">
+        </div>
+        <button  type="submit" class="btn btn-primary">Submit</button>
+        `
+        modalTitle.appendChild(formAdd);
+      })
+      myArticles.appendChild(addAnotherArticle);
       articles.forEach((article) => {
         let div = document.createElement('div');
         div.className = 'row g-3 m-2 border border-primary';
         div.id = article.id;
         div.innerHTML = `
-          <div class="col-md-6">
-          <img src=${article.image} />
+          <div class="col-md-8 col-sm-12 ">
+          <img src=${article.image} class="imgdynamic"/>
           </div>
-          <div class="col-md-6">
+          <div class="col-md-4 col-sm-12 d-inline-block">
           <h5>${article.title}</h5>
-          <p>${article.content}</p>
           <p>${article.content}</p>
           </div>
           `
@@ -166,16 +209,19 @@ function updateUserArticles(id) {
         deleteButton.className = 'btn btn-danger d-flex justify-content-center w-25 '
         deleteButton.textContent = 'Delete'
         deleteButton.addEventListener('click', () => {
+          window.alert('Are you sure you want to delete?');
           deleteArticle(article.id);
+          updateUserArticles(id)
         })
         div.appendChild(deleteButton);
         myArticles.appendChild(div);
       })
+
+
     })
     .catch((err) => console.log("you have some problems", err))
 }
 
-// Function to get articles
 function getArticles(take = 10, skip = 0) {
   return new Promise((resolve, reject) => {
     $.ajax({
@@ -218,8 +264,6 @@ function getCategoryById(id) {
     });
   });
 }
-
-
 function getCategories(take = 10, skip = 0) {
   return new Promise((resolve, reject) => {
     $.ajax({
@@ -234,7 +278,25 @@ function getCategories(take = 10, skip = 0) {
     });
   });
 }
-
+function updateCommentsSection(articleId) {
+  console.log(articleId)
+  getComment(articleId)
+    .then((comments) => {
+      const commentsContainer = document.querySelector('.commentaire-section');
+      commentsContainer.innerHTML = '';
+      comments.forEach((comment) => {
+        const commentElement = document.createElement('div');
+        commentElement.innerHTML = `
+            <h2>${comment.email}</h2>
+          <p>${comment.content}</p>
+            `
+        commentsContainer.appendChild(commentElement);
+      });
+    })
+    .catch((error) => {
+      console.error('Error fetching comments:', error);
+    })
+}
 function showArticlesPerCat(id, tmp) {
   getCategoryById(id).then((cat) => {
     if (cat.articles && cat.articles.length > 0) {
@@ -248,7 +310,7 @@ function showArticlesPerCat(id, tmp) {
         `
       for (let index = 0; index < tmp; index++) {
         const categoryElementDiv = document.createElement('div');
-        categoryElementDiv.className = 'imgplustitle col col-3';
+        categoryElementDiv.className = 'imgplustitle col col-4';
         categoryElementDiv.innerHTML = `
         <img src=${cat.articles[index].image} class="img-thumbnail"/>
        <div> <h4 id=${cat.articles[index].id}>${cat.articles[index].title}</h4>
@@ -267,27 +329,33 @@ function showArticlesPerCat(id, tmp) {
     $('.categoriesdiv').show();
     $('.homediv').hide();
     $('.articlediv').hide();
-
   })
 }
 function listCategories(take) {
   getCategories(take).then((cats) => {
     let dropTownMenu = document.querySelector('.dropdown-menu');
-    cats.forEach((cat) => {
-      let listItem = document.createElement('li');
-      let anchor = document.createElement('a');
-      anchor.classList.add('dropdown-item');
-      anchor.href = '#';
-      anchor.id = cat.id;
-      anchor.textContent = cat.name;
-      anchor.addEventListener('click', () => {
-        showArticlesPerCat(cat.id, tmp);
-      });
-      listItem.appendChild(anchor);
-      dropTownMenu.appendChild(listItem);
+    cats.forEach((cat, index) => {
+      if (index < 9) {
+        let listItem = document.createElement('li');
+        let anchor = document.createElement('a');
+        anchor.classList.add('dropdown-item');
+        anchor.href = '#';
+        anchor.id = cat.id;
+        anchor.textContent = cat.name;
+        anchor.addEventListener('click', () => {
+          showArticlesPerCat(cat.id, tmp);
+          $('#myArticles').hide();
+          $('.articlediv').hide();
+          $('.homediv').hide();
+          $('.loginpage').hide();
+        });
+        listItem.appendChild(anchor);
+        dropTownMenu.appendChild(listItem);
+      }
     });
   });
 }
+
 
 function updateArticles(take) {
   getArticles(take).then((articles) => {
@@ -301,7 +369,7 @@ function updateArticles(take) {
       const tagsTitle = document.createElement('div');
       const tagsELements = document.createElement('div');
       const tagsContainer = document.createElement('div');
-      const commentContainer = document.createElement('a');
+      const commentContainer = document.createElement('span');
       const deleteButton = document.createElement('button');
       deleteButton.className = 'btn btn-danger'
       articleElement.className = ' col background-fancy';
@@ -320,9 +388,9 @@ function updateArticles(take) {
       }
       if (article.comments) {
         let nbrCoomments = article.comments.length;
-        commentContainer.innerHTML = `${nbrCoomments} Comments`;
+        commentContainer.innerHTML = `<a type="button" id="commentBtn" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-whatever="${article.id}" >${nbrCoomments} Comments</a>`;
       }
-      commentContainer.href = "#"
+
       articleBody.innerHTML = `
           <img src=${article.image} class="card-img-top" ></img>
         <h2>${article.title}</h2>
@@ -338,6 +406,7 @@ function updateArticles(take) {
         if (article.authorId === res) {
           deleteButton.innerHTML = 'Delete';
           deleteButton.addEventListener('click', () => {
+            window.alert('Are you sure you want to delete?');
             deleteArticle(article.id)
               .then(() => {
                 console.log('Article deleted successfully');
@@ -359,10 +428,23 @@ function updateArticles(take) {
     console.error('Error fetching articles:', error);
   });
 }
+function updateUserName() {
+  getUserName()
+    .then(function (username) {
+      if (username != undefined) {
+        $('.welcomingName').html(`Welcome <span class="userName">${username}</span> To The Best Blog`);
+      }
+    })
+    .catch(function (error) {
+      console.error('Error retrieving user email:', error);
+    });
+}
+
 
 let take = 4;
 let takeCat = 10;
 let tmp = 4;
+let flag=false;
 function loadMoreArticles() {
   take += 4;
   updateArticles(take);
@@ -382,11 +464,23 @@ $('.articlediv').hide();
 $(".onlyformem").hide();
 $('.loginpage').hide();
 $('#myArticles').hide();
-
+$.get('/protected', (data) => {
+  if (data.authenticated) {
+    flag=true;
+    $('.login-page').hide();
+    $('#submit').hide();
+    $('.onlyformem').show();
+    updateUserName();
+    updateUserArticles(Number(data.userId))
+  } else {
+    $('.login-page').show();
+    $('.onlyformem').hide();
+    console.log('User is not authenticated');
+  }
+});
 
 
 $(document).ready(function () {
-
   updateArticles(take);
   listCategories(takeCat);
   const loadMoreButton = document.getElementById('loadMoreButton');
@@ -400,13 +494,6 @@ $(document).ready(function () {
     $('.loginpage').hide();
     $('#myArticles').hide();
   })
-  $("#category-nav").on('click', () => {
-    $('.articlediv').hide();
-    $('.homediv').hide();
-    $('.categoriesdiv').show();
-    $('.loginpage').hide();
-    $('#myArticles').hide();
-  })
   $('#home-nav').on('click', () => {
     $('.articlediv').hide();
     $('.homediv').show();
@@ -415,23 +502,24 @@ $(document).ready(function () {
     $('#myArticles').hide();
   })
   $('#myarticlesDiv').on('click', () => {
-    console.log("first")
     $('.articlediv').hide();
     $('.homediv').hide();
     $('.categoriesdiv').hide();
-    $('.loginpage').hide();
     $('#myArticles').show();
+    $('.loginpage').hide();
   });
   let articleId;
-  $(document).on('click', '#t', function (event) {
+  $(document).on('click', '#commentbtn', function (event) {
     event.preventDefault();
     articleId = $(this).data('bs-whatever');
+    console.log(articleId)
   });
 
   $(document).on('submit', '#commentForm', function (event) {
     event.preventDefault();
     const commentContent = document.getElementById('comment').value;
     let numberId = parseInt(articleId);
+    console.log(numberId, articleId)
     postComment(numberId, commentContent).then((response) => {
       console.log('The comment submitted from email:', response.email);
       updateCommentsSection(numberId);
@@ -441,40 +529,39 @@ $(document).ready(function () {
         alert('Please provide all required data.Note :You need To be authenticated to comment ');
       }
     })
-    // Function to update the comments section
-    function updateCommentsSection(articleId) {
-      getComment(articleId)
-        .then((comments) => {
-          const commentsContainer = document.querySelector('.commentaire-section');
-          commentsContainer.innerHTML = '';
-          comments.forEach((comment) => {
-            const commentElement = document.createElement('div');
-            commentElement.innerHTML = `
-            <h2>${comment.email}</h2>
-          <p>${comment.content}</p>
-            `
-            commentsContainer.appendChild(commentElement);
-          });
-        })
-        .catch((error) => {
-          console.error('Error fetching comments:', error);
-        })
-    }
+
+  })
+  $(document).on('submit', "#formAdd", function (event) {
+    event.preventDefault();
+    const title = document.getElementById('title').value;
+    const content = document.getElementById("content").value;
+    const imgurl = document.getElementById("imgurl").value;
+    getUserId().then((res) => {
+      const idAuthor = Number(res)
+      console.log(idAuthor)
+      postArticle(idAuthor, content, title, imgurl).then((reponse) => {
+        console.log(reponse)
+        updateArticles(take);
+        updateUserArticles(idAuthor);
+        const modal = document.getElementById('exampleModal');
+        const modalInstance = bootstrap.Modal.getInstance(modal);
+        modalInstance.hide();
+      })
+    }).catch(console.log('errrrrrrrrrrrrrrror'))
   })
   $('#ID').submit((event) => {
     event.preventDefault();
     const username = $('#ID input[name="email"]').val();
     const password = $('#ID input[name="password"]').val();
     const errorMessageElement = $('#errorMessage');
+
     postLogin(username, password)
       .then(function (response) {
         if (response.success) {
+          flag=true
           getUserName()
             .then((username) => {
-              console.log('keep')
-              let welcomScection = $('.welcomingName');
-              welcomScection.text(`Welcome ${username}`);
-              // welcomScection.innerHTML = `<h2>hello ${username}</h2>`;
+              $('.welcomingName').html(`Welcome <span class="userName">${username}</span> To The Best Blog`);
             })
             .catch(err => console.log(err))
           updateArticles(take);
@@ -485,11 +572,13 @@ $(document).ready(function () {
           $('#submit').hide();
           $('.onlyformem').show();
           $('.homediv').show();
+          $('#myArticles').show();
           console.log("you're authentciated")
           const user = response.user;
         } else {
-          const errorMessage = data.message || 'Login failed';
-          errorMessageElement.textContent = errorMessage;
+          console.log(response.message)
+          const errorMessage = response.message || 'Login failed';
+          errorMessageElement.html(`<h4 class="text-danger">${errorMessage}</h4>`)
         }
       })
       .catch(
@@ -499,34 +588,35 @@ $(document).ready(function () {
         })
   });
   $('#logout-button').click(function (event) {
+    flag=false;
     event.preventDefault();
     $.ajax({
       url: '/logout',
       method: 'DELETE',
       success: function (response) {
         console.log('Logout successful');
-        $('#submit').show();
         $('.onlyformem').hide();
+        $('#myArticles').hide();
+        $('.homediv').show();
+        $('.welcomingName').hide();
+        $('#submit').show();
       },
       error: function (error) {
         console.error('Error during logout:', error);
       }
     });
   });
-
-  $.get('/protected', (data) => {
-    if (data.authenticated) {
-      $('.login-page').hide();
-      $('#submit').hide();
+  $('.btn-close').on('click',(event)=>{
+    if(flag){
+      console.log("clicked btn")
+      $('#myArticles').show();
       $('.onlyformem').show();
-    } else {
-      $('.login-page').show();
-      $('.onlyformem').hide();
-      console.log('User is not authenticated');
     }
-  });
+  })
+
 
 })
+
 $(document).on('click', (event) => {
   if (event.target.id === 't') {
 
@@ -534,6 +624,7 @@ $(document).on('click', (event) => {
     const button = event.target;
     const id = Number(button.getAttribute('data-bs-whatever'));
     const modalTitle = exampleModal.querySelector('.modal-body');
+    modalTitle.innerHTML = ` `
     getArticleById(id).then(article => {
       const commentaires = document.createElement('div')
 
@@ -554,34 +645,43 @@ $(document).on('click', (event) => {
           <h2>${article.title}</h2>
           <img  src=${article.image} class="card-img" ></img>
           <p>${article.content}</p>
-          <form id="commentForm"  action="/comment" method="POST">
-    <div class="form-group">
-      <label for="comment">Add a Comment:</label>
-      <textarea class="form-control" id="comment" name="comment" rows="3" required></textarea>
-    </div>
-    <button type="submit" class="btn btn-primary" id="${article.id}">Submit</button>
-  </form>
+          
         `;
 
       $('.onlyformem').hide();
       modalTitle.appendChild(commentaires)
     }).catch(err => console.log(err))
   } else {
-    if (event.target.id === 'c') {
+    if (event.target.id === 'commentBtn') {
       event.preventDefault();
       const button = event.target;
       const id = Number(button.getAttribute('data-bs-whatever'));
       const modalTitle = exampleModal.querySelector('.modal-body');
+      modalTitle.innerHTML = ` 
+      <form id="commentForm"  action="/comment" method="POST">
+    <div class="form-group">
+      <label for="comment">Add a Comment:</label>
+      <textarea class="form-control" id="comment" name="comment" rows="3" required></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary" id="${id}">Submit</button>
+  </form>
+      `
       getArticleById(id).then(article => {
         if (article.comments) {
-          console.log(article.comments.reverse())
+          const divComments = document.createElement('div')
           article.comments.reverse().forEach((com) => {
-            modalTitle.innerHTML = `
+            const commentaires = document.createElement('div')
+            commentaires.className = 'card h-25'
+            commentaires.innerHTML = `
           <h2>${com.email}</h2>
           <p>${com.content}</p>
         `
+
+            divComments.className = 'name overflow-y-scroll'
+            divComments.appendChild(commentaires)
           }
           )
+          modalTitle.appendChild(divComments);
         }
       }).catch(err => console.log(err))
     }
@@ -593,5 +693,7 @@ $(document).on('click', (event) => {
         $('.loginpage').show();
       }
     }
+
   }
 })
+

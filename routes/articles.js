@@ -18,7 +18,7 @@ router.post('/', async (req, res) => {
       content: req.body.content,
       image: req.body.image_url,
       author: {
-        connect: { id: req.body.author }
+        connect: { id: parseInt(req.body.author) }
       }
     };
 

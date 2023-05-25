@@ -8,7 +8,7 @@ POST http://localhost:3000/articles
 Content-Type: application/json
 
 {
-    "title": "New article",
+    "title": "New article TWO",
     "content": "This is the content of the new article.",
     "author": 5,
     "image_url": "https://example.com/image.jpg"

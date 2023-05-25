@@ -7,7 +7,7 @@ const flash = require('express-flash')
 const session = require('express-session')
 const methodOverride = require('method-override')
 const bodyParser = require('body-parser')
-
+const path=require('path')
 initializePassport(passport,
   async emailS => {
     return await prisma.user.findUnique({
@@ -42,7 +42,7 @@ app.use(passport.session({
   cookie: { secure: true }
 }))
 app.use(methodOverride('_method'))
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'public')));
 
 const login = require('./routes/login')
 const articles = require('./routes/articles')
@@ -65,8 +65,8 @@ app.delete('/logout', (req, res) => {
   res.sendStatus(200);
 })
 app.get('/protected', (req, res) => {
-  if (req.isAuthenticated()) {
-    res.send({ authenticated: true });
+  if (req.session.idUser) {
+    res.send({ authenticated: true,userId: req.session.idUser });
   } else {
     res.send({ authenticated: false });
   }
@@ -79,6 +79,13 @@ app.get('/user/id', (req, res) => {
   var userId = req.session.idUser || '';
   var userName = req.session.userName;
   res.json({ userId: userId,userName:userName });
+})
+app.get('/authentication',(req,res)=>{
+  const value=false;
+  if(req.isAuthenticated()){
+    value = "true";
+  }
+  res.json({authenticated:value,userId:req.session.idUser,userName:req.session.userName});
 })
 function checkAuthenticated(req, res, next) {
   if (req.isAuthenticated()) {
