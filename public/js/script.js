@@ -101,6 +101,7 @@ function getUsers() {
               const divUsersContainer = document.createElement('div');
 
               response.forEach((res) => {
+                if(res.role!='ADMIN'){
                 const divUsers = document.createElement('div');
                 divUsers.className = 'usersContainer';
                 divUsers.innerHTML = `
@@ -124,7 +125,7 @@ function getUsers() {
                 divUsers.append(buttonDel)
                 divUsersContainer.append(divUsers)
                 $('#users').append(divUsersContainer)
-              })
+            }})
             },
             error: (error) => {
               reject(error)
@@ -290,9 +291,16 @@ function updateUserArticles(id) {
         deleteButton.textContent = 'Delete'
         deleteButton.addEventListener('click', () => {
           window.alert('Are you sure you want to delete?');
-          deleteArticle(article.id);
-          updateUserArticles(id)
-        })
+          deleteArticle(article.id)
+            .then(() => {
+              div.remove(); // Remove the deleted article element from DOM
+              const index = articles.findIndex((a) => a.id === article.id);
+              if (index !== -1) {
+                articles.splice(index, 1); // Remove the deleted article from the array
+              }
+            })
+            .catch((err) => console.log('Error deleting article', err));
+        });
         div.appendChild(deleteButton);
         myArticles.appendChild(div);
       })
@@ -483,7 +491,7 @@ function updateArticles(take) {
       articleBody.appendChild(commentContainer);
 
       getUserId().then((res) => {
-        if (article.authorId === res||myRole=='ADMIN') {
+        if (article.authorId === res || myRole == 'ADMIN') {
           deleteButton.innerHTML = 'Delete';
           deleteButton.addEventListener('click', () => {
             window.alert('Are you sure you want to delete?');
@@ -576,6 +584,7 @@ $.get('/protected', (data) => {
 
 
 $(document).ready(function () {
+  $('#myArticles').hide();
   updateArticles(take);
   listCategories(takeCat);
   const loadMoreButton = document.getElementById('loadMoreButton');
@@ -588,6 +597,7 @@ $(document).ready(function () {
     $('.articlediv').show();
     $('.loginpage').hide();
     $('#myArticles').hide();
+    $('#users').hide();
   })
   $('#home-nav').on('click', () => {
     $('.articlediv').hide();
@@ -595,6 +605,7 @@ $(document).ready(function () {
     $('.categoriesdiv').hide();
     $('.loginpage').hide();
     $('#myArticles').hide();
+     $('#users').hide();
   })
   $('#myarticlesDiv').on('click', () => {
     $('.articlediv').hide();
@@ -681,11 +692,10 @@ $(document).ready(function () {
           $('#submit').hide();
           $('.onlyformem').show();
           $('.homediv').show();
-          $('#myArticles').show();
           console.log("you're authentciated")
           const user = response.user;
         } else {
-          console.log(response.message)
+
           const errorMessage = response.message || 'Login failed';
           errorMessageElement.html(`<h4 class="text-danger">${errorMessage}</h4>`)
         }
@@ -698,6 +708,8 @@ $(document).ready(function () {
   });
   $('#logout-button').click(function (event) {
     flag = false;
+    const errorMessageElement = $('#errorMessage');
+    errorMessageElement.html('');
     event.preventDefault();
     $.ajax({
       url: '/logout',
